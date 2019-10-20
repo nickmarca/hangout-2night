@@ -17,26 +17,46 @@ export function canUserGoToVenue(
     venue: Venue
 ): [boolean, { reason: string }[]] {
     const hasSomethingForUserEat = !venue.food.every(
-        food => !!user.wont_eat.find(wont_eat => food === wont_eat)
+        food =>
+            !!user.wont_eat.find(
+                wont_eat =>
+                    food.toLocaleLowerCase() === wont_eat.toLocaleLowerCase()
+            )
     );
 
     const hasSomethingForUserDrink = !!user.drinks.find(drink =>
-        venue.drinks.find(venue_drink => venue_drink === drink)
+        venue.drinks.find(
+            venue_drink =>
+                venue_drink.toLocaleLowerCase() === drink.toLocaleLowerCase()
+        )
     );
 
-    const reason1 = hasSomethingForUserDrink ? [] : [{reason: `There's nothing for ${user.name} to drink`}];
-    const reason2 = hasSomethingForUserEat ? [] : [{reason: `There's nothing for ${user.name} to eat`}];
+    const reason1 = hasSomethingForUserDrink
+        ? []
+        : [{ reason: `There's nothing for ${user.name} to drink` }];
+    const reason2 = hasSomethingForUserEat
+        ? []
+        : [{ reason: `There's nothing for ${user.name} to eat` }];
 
     return [
         hasSomethingForUserDrink && hasSomethingForUserEat,
-        [...reason1, ...reason2]
+        [...reason1, ...reason2],
     ];
 }
 
-export function canUsersGoToVenue(users: User[], venue: Venue): [boolean, { reason: string }[]] {
+export function canAllUsersGoToVenue(
+    users: User[],
+    venue: Venue
+): [boolean, { reason: string }[]] {
     const canUsersGoToVenue = users.map(user => canUserGoToVenue(user, venue));
 
-    return canUsersGoToVenue.reduce(([isUsersGoing, allUsersReasons], [isUserGoing, reasons]) => {
-        return [isUsersGoing && isUserGoing, allUsersReasons.concat(reasons)];
-    }, [true, []]);
+    return canUsersGoToVenue.reduce(
+        ([isUsersGoing, allUsersReasons], [isUserGoing, reasons]) => {
+            return [
+                isUsersGoing && isUserGoing,
+                allUsersReasons.concat(reasons),
+            ];
+        },
+        [true, []]
+    );
 }
